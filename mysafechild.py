@@ -3,21 +3,12 @@ import email
 from email.header import decode_header
 from datetime import datetime
 
-# E-posta hesabı bilgileri
-email_address = "ahmetzincir27@gmail.com"
-password = "nxsy grjm qjur hxiw"
-
-imap_server = "imap.gmail.com"
-imap_port = 993
-imap = imaplib.IMAP4_SSL(imap_server, imap_port)
-
-imap.login(email_address, password)
-
+imap = imaplib.IMAP4_SSL( "imap.gmail.com", 993)
+imap.login("ahmetzincir27@gmail.com", "nxsy grjm qjur hxiw")
 mailbox = "INBOX"
 imap.select(mailbox)
 
 status, data = imap.search(None, 'FROM "ahmetzincir27@gmail.com"')
-
 # Alınan tüm e-postaları işleme
 for num in reversed(data[0].split()):
     # E-postanın alınması
@@ -31,15 +22,9 @@ for num in reversed(data[0].split()):
     date_tuple = email.utils.parsedate_tz(msg["Date"])
     if date_tuple:
         local_date = datetime.fromtimestamp(email.utils.mktime_tz(date_tuple))
-        date_str = local_date.strftime("%Y-%m-%d %H:%M:%S")
+        date_str = local_date.strftime("%Y-%m-%d %H:%M")
     else:
         date_str = "No Date"
-
-    # E-postanın başlığını ve kimden geldiğini almak
-    if msg["Subject"] is not None:
-        subject = decode_header(msg["Subject"])[0][0]
-    else:
-        subject = "No subject"
     sender = decode_header(msg["From"])[0][0]
 
     # E-posta içeriğini almak
@@ -56,15 +41,8 @@ for num in reversed(data[0].split()):
     else:
         email_body = msg.get_payload(decode=True).decode()
 
-    # Tarih, başlık, gönderen ve içeriğin yazdırılması
     print("Date:", date_str)
-    print("Subject:", subject)
-    print("From:", sender)
     print("Content:", email_body)
     print()
-
-    # İhtiyacınıza göre e-posta içeriğini ve diğer detayları işleyebilirsiniz
-
-# IMAP oturumunu sonlandırma
 imap.close()
 imap.logout()
