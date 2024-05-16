@@ -12,6 +12,8 @@ def imapFunc():
     mailbox = "INBOX"
     imap.select(mailbox)
 
+    emailBodies = []
+
     status, data = imap.search(None, 'FROM "ahmetzincir27@gmail.com"')
     # Alınan tüm e-postaları işleme
     for num in reversed(data[0].split()):
@@ -41,16 +43,19 @@ def imapFunc():
                 except:
                     pass
                 if content_type == "text/plain" and "attachment" not in content_disposition:
-                    email_body = body
+                    emailBody = body
+                    emailBodies.append(emailBody)  # Gövdeleri listeye ekle
         else:
-            email_body = msg.get_payload(decode=True).decode()
+            emailBody = msg.get_payload(decode=True).decode()
+            emailBodies.append(emailBody)  # Gövdeleri listeye ekle
 
         print("Date:", date_str)
-        print("Content:", email_body)
+        print("Content:", emailBody)
         print()
     imap.close()
     imap.logout()
 
+    return emailBodies  # emailBodies listesini döndür
 
 
 class SafeChild(QMainWindow):
