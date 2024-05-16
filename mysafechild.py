@@ -1,20 +1,20 @@
 import imaplib
 import email
-from email.header import decode_header
 from datetime import datetime
 import sys
 from PyQt5.QtWidgets import QMainWindow, QApplication, QWidget, QVBoxLayout, QTextEdit, QLineEdit, QPushButton
 
-
-def imapFunc():
+def imapFunc(fromAdress):
     imap = imaplib.IMAP4_SSL("imap.gmail.com", 993)
     imap.login("ahmetzincir27@gmail.com", "nxsy grjm qjur hxiw")
     mailbox = "INBOX"
     imap.select(mailbox)
 
-    emailBodies = []
 
-    status, data = imap.search(None, 'FROM "ahmetzincir27@gmail.com"')
+    emailBodies = []
+    dateStrings = []
+
+    status, data = imap.search(None, f'FROM "{fromAdress}"')
     # Alınan tüm e-postaları işleme
     for num in reversed(data[0].split()):
         # E-postanın alınması
@@ -29,11 +29,10 @@ def imapFunc():
         if date_tuple:
             local_date = datetime.fromtimestamp(email.utils.mktime_tz(date_tuple))
             date_str = local_date.strftime("%Y-%m-%d %H:%M")
+            dateStrings.append(date_str)  # Tarih dizisine ekle
         else:
             date_str = "No Date"
-        sender = decode_header(msg["From"])[0][0]
 
-        # E-posta içeriğini almak
         if msg.is_multipart():
             for part in msg.walk():
                 content_type = part.get_content_type()
@@ -52,10 +51,11 @@ def imapFunc():
         print("Date:", date_str)
         print("Content:", emailBody)
         print()
+
     imap.close()
     imap.logout()
 
-    return emailBodies  # emailBodies listesini döndür
+    return emailBodies, dateStrings  # emailBodies ve dateStrings listelerini döndür
 
 
 class SafeChild(QMainWindow):
@@ -77,16 +77,24 @@ class SafeChild(QMainWindow):
         self.searchBar.setPlaceholderText("Kelime Ara")
         self.layout.addWidget(self.searchBar)
 
+        self.fromEmail = QLineEdit()
+        self.fromEmail.setPlaceholderText("Email adresi gir")
+        self.layout.addWidget(self.fromEmail)
+
+
         self.searchButton = QPushButton("Ara")
         self.searchButton.clicked.connect(self.search)
         self.layout.addWidget(self.searchButton)
 
-        emailBodies = imapFunc()
-        for emailBody in emailBodies:
-            self.showEmail(emailBody)
-    def showEmail(self, emailBody):
-        self.textEdit.append(emailBody)
+
+    def showEmail(self, date_str, emailBody):
+        self.textEdit.append(f"Date: {date_str}\nContent: {emailBody}\n")
+
     def search(self):
+        whichEmmail = self.fromEmail.text()
+        emailBodies, dateStrings = imapFunc(whichEmmail)
+        for emailBody, date_str in zip(emailBodies, dateStrings):  # emailBodies ve dateStrings listelerini eşleştir
+            self.showEmail(date_str, emailBody)
         keyword = self.searchBar.text()
         document = self.textEdit.toPlainText()
         if keyword:
@@ -96,12 +104,13 @@ class SafeChild(QMainWindow):
         else:
             self.textEdit.setHtml(document)
 
+
 def main():
     app = QApplication(sys.argv)
     window = SafeChild()
     window.show()
     sys.exit(app.exec_())
 
+
 if __name__ == "__main__":
     main()
-
