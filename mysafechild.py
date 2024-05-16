@@ -2,7 +2,7 @@ import imaplib
 import email
 from email.header import decode_header
 from datetime import datetime
-import  sys
+import sys
 from PyQt5.QtWidgets import QMainWindow, QApplication, QWidget, QVBoxLayout, QTextEdit, QLineEdit, QPushButton
 
 
@@ -99,3 +99,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
