@@ -4,6 +4,7 @@ from datetime import datetime
 import sys
 from PyQt5.QtWidgets import QMainWindow, QApplication, QWidget, QVBoxLayout, QTextEdit, QLineEdit, QPushButton
 
+
 def imapFunc(fromAdress):
     imap = imaplib.IMAP4_SSL("imap.gmail.com", 993)
     imap.login("ahmetzincir27@gmail.com", "nxsy grjm qjur hxiw")
@@ -91,6 +92,7 @@ class SafeChild(QMainWindow):
         self.textEdit.append(f"Date: {date_str}\nContent: {emailBody}\n")
 
     def search(self):
+
         whichEmmail = self.fromEmail.text()
         emailBodies, dateStrings = imapFunc(whichEmmail)
         for emailBody, date_str in zip(emailBodies, dateStrings):  # emailBodies ve dateStrings listelerini eşleştir
